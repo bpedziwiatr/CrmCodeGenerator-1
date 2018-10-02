@@ -54,7 +54,7 @@ namespace CrmCodeGenerator.VSPackage.Model
             if (rel.Entity1LogicalName == rel.Entity2LogicalName && rel.Entity1LogicalName == ThisEntityLogicalName)
             {
                 result.DisplayName = "Referenced" + result.DisplayName;
-                result.EntityRole = "Microsoft.Xrm.Sdk.EntityRole.Referenced";
+                result.EntityRole = "EntityRole.Referenced";
                 result.IsSelfReferenced = true;
             }
             if (result.DisplayName == ThisEntityLogicalName)

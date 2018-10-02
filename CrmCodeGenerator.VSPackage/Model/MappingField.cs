@@ -1,43 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using CrmCodeGenerator.VSPackage.Helpers;
 using Microsoft.Xrm.Sdk.Metadata;
-using CrmCodeGenerator.VSPackage.Helpers;
+using System;
+using System.Linq;
 
 namespace CrmCodeGenerator.VSPackage.Model
 {
     [Serializable]
     public class MappingField
     {
-        public AttributeMetadata AttributeMetadata { get; set; }
+        public MappingField()
+        {
+            IsValidForUpdate = false;
+            IsValidForCreate = false;
+            IsDeprecated = false;
+            Description = "";
+        }
+
         public CrmPropertyAttribute Attribute { get; set; }
-        public MappingEntity Entity { get; set; }
+        public AttributeMetadata AttributeMetadata { get; set; }
         public string AttributeOf { get; set; }
-        public MappingEnum EnumData { get; set; }
-        public AttributeTypeCode FieldType { get; set; }
-        public string FieldTypeString { get; set; }
-        public bool IsValidForCreate { get; set; }
-        public bool IsValidForRead { get; set; }
-        public bool IsValidForUpdate { get; set; }
-        public bool IsActivityParty { get; set; }
-        public bool IsStateCode { get; set; }
-        public bool IsDeprecated { get; set; }
-        public bool IsOptionSet { get; private set; }
-        public bool IsTwoOption { get; private set; }
+        public string AttributeTypeName { get; private set; }
         public string DeprecatedVersion { get; set; }
-        public string LookupSingleType { get; set; }
-        bool IsPrimaryKey { get; set; }
-        public bool IsRequired { get; set; }
-        public int? MaxLength { get; set; }
-        public decimal? Min { get; set; }
-        public decimal? Max { get; set; }
-        public string PrivatePropertyName { get; set; }
-        public string DisplayName { get; set; }
-        public string HybridName { get; set; }
-        public string LogicalName { get; set; }
-        public string StateName { get; set; }
-        public string TargetTypeForCrmSvcUtil { get; set; }
         public string Description { get; set; }
         public string DescriptionXmlSafe
         {
@@ -47,14 +30,152 @@ namespace CrmCodeGenerator.VSPackage.Model
             }
         }
 
+        public string DisplayName { get; set; }
+        public MappingEntity Entity { get; set; }
+        public MappingEnum EnumData { get; set; }
+        public AttributeTypeCode FieldType { get; set; }
+        public string FieldTypeString { get; set; }
+        public string GetMethod { get; set; }
+        public string HybridName { get; set; }
+        public bool IsActivityParty { get; set; }
+        public bool IsDeprecated { get; set; }
+        public bool IsOptionSet { get; private set; }
+        public bool IsRequired { get; set; }
+        public bool IsStateCode { get; set; }
+        public bool IsTwoOption { get; private set; }
+        public bool IsValidForCreate { get; set; }
+        public bool IsValidForRead { get; set; }
+        public bool IsValidForUpdate { get; set; }
         public string Label { get; set; }
-        public MappingField()
+        public string LogicalName { get; set; }
+        public string LookupSingleType { get; set; }
+        public decimal? Max { get; set; }
+        public int? MaxLength { get; set; }
+        public decimal? Min { get; set; }
+        public string PrivatePropertyName { get; set; }
+        public string SetMethodCall
         {
-            IsValidForUpdate = false;
-            IsValidForCreate = false;
-            IsDeprecated = false;
-            Description = "";
+            get
+            {
+                var methodName = "";
+
+                switch (FieldType)
+                {
+                    case AttributeTypeCode.Picklist:
+                        methodName = "SetPicklist"; break;
+                    case AttributeTypeCode.BigInt:
+                    case AttributeTypeCode.Integer:
+                        methodName = "SetValue<int?>"; break;
+                    case AttributeTypeCode.Boolean:
+                        methodName = "SetValue<bool?>"; break;
+                    case AttributeTypeCode.DateTime:
+                        methodName = "SetValue<DateTime?>"; break;
+                    case AttributeTypeCode.Decimal:
+                        methodName = "SetValue<decimal?>"; break;
+                    case AttributeTypeCode.Money:
+                        methodName = "SetMoney"; break;
+                    case AttributeTypeCode.Memo:
+                    case AttributeTypeCode.String:
+                        methodName = "SetValue<string>"; break;
+                    case AttributeTypeCode.Double:
+                        methodName = "SetValue<double?>"; break;
+                    case AttributeTypeCode.Uniqueidentifier:
+                        methodName = "SetValue<Guid?>"; break;
+                    case AttributeTypeCode.Lookup:
+                        methodName = "SetLookup"; break;
+                    //methodName = "SetLookup"; break;
+                    case AttributeTypeCode.Virtual:
+                        if (AttributeTypeName == "MultiSelectPicklistType")
+                        {
+                            return "SetValue<OptionSetValueCollection>";
+                        }
+                        methodName = "SetValue<string>"; break;
+                    case AttributeTypeCode.Customer:
+                        methodName = "SetCustomer"; break;
+                    case AttributeTypeCode.Status:
+                        methodName = ""; break;
+                    case AttributeTypeCode.EntityName:
+                        methodName = "SetEntityNameReference"; break;
+                    case AttributeTypeCode.State:
+                    case AttributeTypeCode.Owner:
+                    default:
+                        return "";
+                }
+
+                if (methodName == "" || !this.IsValidForUpdate)
+                    return "";
+
+                if (FieldType == AttributeTypeCode.Picklist)
+                    return string.Format("{0}(\"{1}\", (int?)value);", methodName, this.Attribute.LogicalName);
+
+                if (FieldType == AttributeTypeCode.Lookup || FieldType == AttributeTypeCode.Customer)
+                    if (string.IsNullOrEmpty(LookupSingleType))
+                        return string.Format("{0}(\"{1}\", {2}Type, value);", methodName, Attribute.LogicalName, this.DisplayName);
+                    else
+                        return string.Format("{0}(\"{1}\", \"{2}\", value);", methodName, Attribute.LogicalName, this.LookupSingleType);
+
+                return string.Format("{0}(\"{1}\", value);", methodName, this.Attribute.LogicalName);
+            }
         }
+
+        public string StateName { get; set; }
+        public string TargetType
+        {
+            get
+            {
+                if (IsPrimaryKey)
+                    return "Guid";
+
+                switch (FieldType)
+                {
+                    case AttributeTypeCode.Picklist:
+                        return string.Format("Enums.{0}?", EnumData.DisplayName);
+
+                    case AttributeTypeCode.BigInt:
+                    case AttributeTypeCode.Integer:
+                        return "int?";
+
+                    case AttributeTypeCode.Boolean:
+                        return "bool?";
+
+                    case AttributeTypeCode.DateTime:
+                        return "DateTime?";
+
+                    case AttributeTypeCode.Decimal:
+                    case AttributeTypeCode.Money:
+                        return "decimal?";
+
+                    case AttributeTypeCode.Double:
+                        return "double?";
+
+                    case AttributeTypeCode.Uniqueidentifier:
+                    case AttributeTypeCode.Lookup:
+                    case AttributeTypeCode.Owner:
+                    case AttributeTypeCode.Customer:
+                        return "Guid?";
+
+                    case AttributeTypeCode.State:
+                    case AttributeTypeCode.Status:
+                        return "int";
+
+                    case AttributeTypeCode.Memo:
+                    case AttributeTypeCode.Virtual:
+                    case AttributeTypeCode.EntityName:
+                    case AttributeTypeCode.String:
+                        if (AttributeTypeName == "MultiSelectPicklistType")
+                        {
+                            return "OptionSetValueCollection";
+                        }
+                        return "string";
+
+                    default:
+                        return "object";
+                }
+            }
+        }
+
+        public string TargetTypeForCrmSvcUtil { get; set; }
+        private bool IsPrimaryKey { get; set; }
         public static MappingField Parse(AttributeMetadata attribute, MappingEntity entity)
         {
             var result = new MappingField();
@@ -121,8 +242,73 @@ namespace CrmCodeGenerator.VSPackage.Model
             result.TargetTypeForCrmSvcUtil = GetTargetType(result);
             result.FieldTypeString = result.TargetTypeForCrmSvcUtil;
 
-
             return result;
+        }
+
+        private static string GetTargetType(MappingField field)
+        {
+            if (field.IsPrimaryKey)
+                return "Guid?";
+
+            switch (field.FieldType)
+            {
+                case AttributeTypeCode.Picklist:
+                    return "OptionSetValue";
+
+                case AttributeTypeCode.BigInt:
+                    return "long?";
+
+                case AttributeTypeCode.Integer:
+                    return "int?";
+
+                case AttributeTypeCode.Boolean:
+                    return "bool?";
+
+                case AttributeTypeCode.DateTime:
+                    return "DateTime?";
+
+                case AttributeTypeCode.Decimal:
+                    return "decimal?";
+
+                case AttributeTypeCode.Money:
+                    return "Money";
+
+                case AttributeTypeCode.Double:
+                    return "double?";
+
+                case AttributeTypeCode.Uniqueidentifier:
+                    return "Guid?";
+
+                case AttributeTypeCode.Lookup:
+                case AttributeTypeCode.Owner:
+                case AttributeTypeCode.Customer:
+                    return "EntityReference";
+
+                case AttributeTypeCode.State:
+                    return "" + field.Entity.StateName + "?";
+
+                case AttributeTypeCode.Status:
+                    return "OptionSetValue";
+
+                case AttributeTypeCode.Memo:
+                case AttributeTypeCode.Virtual:
+                case AttributeTypeCode.EntityName:
+                case AttributeTypeCode.String:
+                    if (field.AttributeTypeName == "MultiSelectPicklistType")
+                    {
+                        return "OptionSetValueCollection";
+                    }
+                    return "string";
+
+                case AttributeTypeCode.PartyList:
+                    return "IEnumerable<ActivityParty>";
+
+                case AttributeTypeCode.ManagedProperty:
+                    return "BooleanManagedProperty";
+
+                default:
+                    return "object";
+            }
         }
 
         private static void ParseMinMaxValues(AttributeMetadata attribute, MappingField result)
@@ -162,185 +348,5 @@ namespace CrmCodeGenerator.VSPackage.Model
                 result.Max = attr.MaxValue != null ? (decimal)attr.MaxValue.Value : -1;
             }
         }
-
-
-
-
-        private static string GetTargetType(MappingField field)
-        {
-            if (field.IsPrimaryKey)
-                return "System.Nullable<System.Guid>";
-
-            switch (field.FieldType)
-            {
-                case AttributeTypeCode.Picklist:
-                    return "Microsoft.Xrm.Sdk.OptionSetValue";
-                case AttributeTypeCode.BigInt:
-                    return "System.Nullable<long>";
-                case AttributeTypeCode.Integer:
-                    return "System.Nullable<int>";
-                case AttributeTypeCode.Boolean:
-                    return "System.Nullable<bool>";
-                case AttributeTypeCode.DateTime:
-                    return "System.Nullable<System.DateTime>";
-                case AttributeTypeCode.Decimal:
-                    return "System.Nullable<decimal>";
-                case AttributeTypeCode.Money:
-                    return "Microsoft.Xrm.Sdk.Money";
-                case AttributeTypeCode.Double:
-                    return "System.Nullable<double>";
-                case AttributeTypeCode.Uniqueidentifier:
-                    return "System.Nullable<System.Guid>";
-                case AttributeTypeCode.Lookup:
-                case AttributeTypeCode.Owner:
-                case AttributeTypeCode.Customer:
-                    return "Microsoft.Xrm.Sdk.EntityReference";
-                case AttributeTypeCode.State:
-                    return "System.Nullable<" + field.Entity.StateName + ">";
-                case AttributeTypeCode.Status:
-                    return "Microsoft.Xrm.Sdk.OptionSetValue";
-                case AttributeTypeCode.Memo:
-                case AttributeTypeCode.Virtual:
-                case AttributeTypeCode.EntityName:
-                case AttributeTypeCode.String:
-                    if (field.AttributeTypeName == "MultiSelectPicklistType")
-                    {
-                        return "Microsoft.Xrm.Sdk.OptionSetValueCollection";
-                    }
-                    return "string";
-                case AttributeTypeCode.PartyList:
-                    return "System.Collections.Generic.IEnumerable<ActivityParty>";
-                case AttributeTypeCode.ManagedProperty:
-                    return "Microsoft.Xrm.Sdk.BooleanManagedProperty";
-
-                default:
-                    return "object";
-            }
-        }
-
-
-        public string TargetType
-        {
-            get
-            {
-                if (IsPrimaryKey)
-                    return "Guid";
-
-                switch (FieldType)
-                {
-                    case AttributeTypeCode.Picklist:
-                        return string.Format("Enums.{0}?", EnumData.DisplayName);
-
-                    case AttributeTypeCode.BigInt:
-                    case AttributeTypeCode.Integer:
-                        return "int?";
-
-                    case AttributeTypeCode.Boolean:
-                        return "bool?";
-
-                    case AttributeTypeCode.DateTime:
-                        return "DateTime?";
-
-                    case AttributeTypeCode.Decimal:
-                    case AttributeTypeCode.Money:
-                        return "decimal?";
-
-                    case AttributeTypeCode.Double:
-                        return "double?";
-
-                    case AttributeTypeCode.Uniqueidentifier:
-                    case AttributeTypeCode.Lookup:
-                    case AttributeTypeCode.Owner:
-                    case AttributeTypeCode.Customer:
-                        return "Guid?";
-
-                    case AttributeTypeCode.State:
-                    case AttributeTypeCode.Status:
-                        return "int";
-
-                    case AttributeTypeCode.Memo:
-                    case AttributeTypeCode.Virtual:
-                    case AttributeTypeCode.EntityName:
-                    case AttributeTypeCode.String:
-                        if (AttributeTypeName == "MultiSelectPicklistType")
-                        {
-                            return "Microsoft.Xrm.Sdk.OptionSetValueCollection";
-                        }
-                        return "string";
-
-                    default:
-                        return "object";
-                }
-            }
-        }
-
-        public string GetMethod { get; set; }
-
-        public string SetMethodCall
-        {
-            get
-            {
-                var methodName = "";
-
-                switch (FieldType)
-                {
-                    case AttributeTypeCode.Picklist:
-                        methodName = "SetPicklist"; break;
-                    case AttributeTypeCode.BigInt:
-                    case AttributeTypeCode.Integer:
-                        methodName = "SetValue<int?>"; break;
-                    case AttributeTypeCode.Boolean:
-                        methodName = "SetValue<bool?>"; break;
-                    case AttributeTypeCode.DateTime:
-                        methodName = "SetValue<DateTime?>"; break;
-                    case AttributeTypeCode.Decimal:
-                        methodName = "SetValue<decimal?>"; break;
-                    case AttributeTypeCode.Money:
-                        methodName = "SetMoney"; break;
-                    case AttributeTypeCode.Memo:
-                    case AttributeTypeCode.String:
-                        methodName = "SetValue<string>"; break;
-                    case AttributeTypeCode.Double:
-                        methodName = "SetValue<double?>"; break;
-                    case AttributeTypeCode.Uniqueidentifier:
-                        methodName = "SetValue<Guid?>"; break;
-                    case AttributeTypeCode.Lookup:
-                        methodName = "SetLookup"; break;
-                    //methodName = "SetLookup"; break;
-                    case AttributeTypeCode.Virtual:
-                        if (AttributeTypeName == "MultiSelectPicklistType")
-                        {
-                            return "SetValue<Microsoft.Xrm.Sdk.OptionSetValueCollection>";
-                        }
-                        methodName = "SetValue<string>"; break;
-                    case AttributeTypeCode.Customer:
-                        methodName = "SetCustomer"; break;
-                    case AttributeTypeCode.Status:
-                        methodName = ""; break;
-                    case AttributeTypeCode.EntityName:
-                        methodName = "SetEntityNameReference"; break;
-                    case AttributeTypeCode.State:
-                    case AttributeTypeCode.Owner:
-                    default:
-                        return "";
-                }
-
-                if (methodName == "" || !this.IsValidForUpdate)
-                    return "";
-
-                if (FieldType == AttributeTypeCode.Picklist)
-                    return string.Format("{0}(\"{1}\", (int?)value);", methodName, this.Attribute.LogicalName);
-
-                if (FieldType == AttributeTypeCode.Lookup || FieldType == AttributeTypeCode.Customer)
-                    if (string.IsNullOrEmpty(LookupSingleType))
-                        return string.Format("{0}(\"{1}\", {2}Type, value);", methodName, Attribute.LogicalName, this.DisplayName);
-                    else
-                        return string.Format("{0}(\"{1}\", \"{2}\", value);", methodName, Attribute.LogicalName, this.LookupSingleType);
-
-                return string.Format("{0}(\"{1}\", value);", methodName, this.Attribute.LogicalName);
-            }
-        }
-
-        public string AttributeTypeName { get; private set; }
     }
 }

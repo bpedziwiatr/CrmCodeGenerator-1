@@ -49,7 +49,7 @@ namespace CrmCodeGenerator.VSPackage.Model
             if (rel.ReferencedEntity == rel.ReferencingEntity)
             {
                 result.DisplayName = "Referenced" + result.DisplayName;
-                result.EntityRole = "Microsoft.Xrm.Sdk.EntityRole.Referenced";
+                result.EntityRole = "EntityRole.Referenced";
             }
 
             return result;
