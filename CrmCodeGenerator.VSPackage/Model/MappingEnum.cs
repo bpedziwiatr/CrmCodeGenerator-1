@@ -30,7 +30,9 @@ namespace CrmCodeGenerator.VSPackage.Model
             {
                 DisplayName = Naming.GetProperVariableName(Naming.GetProperVariableName(picklist.SchemaName)),
                 Items =
-                    picklist.OptionSet.Options.Select(
+                    picklist.OptionSet.Options
+                    .Where(p=>p.Label.UserLocalizedLabel != null)
+                    .Select(
                         o => new MapperEnumItem
                         {
                             Attribute = new CrmPicklistAttribute
