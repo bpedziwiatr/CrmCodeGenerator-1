@@ -11,7 +11,7 @@ namespace CrmCodeGenerator.VSPackage.Model
     {
         public CrmEntityAttribute Attribute { get; set; }
         public bool IsIntersect { get; set; }
-        public Nullable<int> TypeCode { get; set; }
+        public int? TypeCode { get; set; }
         public MappingField[] Fields { get; set; }
         public MappingEnum States { get; set; }
         public MappingEnum[] Enums { get; set; }
@@ -136,7 +136,7 @@ namespace CrmCodeGenerator.VSPackage.Model
             {
                 var referencing = (MappingRelationshipMN)referecned.Clone();
                 referencing.DisplayName = "Referencing" + Naming.GetProperVariableName(referecned.SchemaName);
-                referencing.EntityRole = "Microsoft.Xrm.Sdk.EntityRole.Referencing";
+                referencing.EntityRole = "EntityRole.Referencing";
                 RelationshipsManyToMany.Add(referencing);
             }
             RelationshipsManyToMany.ForEach(r => {
@@ -234,7 +234,7 @@ namespace CrmCodeGenerator.VSPackage.Model
                 },
                 DisplayName = "EntityImage_Timestamp",
                 HybridName = "EntityImage_Timestamp",
-                TargetTypeForCrmSvcUtil = "System.Nullable<long>",
+                TargetTypeForCrmSvcUtil = "long?",
                 FieldType = AttributeTypeCode.BigInt,
                 IsValidForUpdate = false,
                 IsValidForCreate = false,
