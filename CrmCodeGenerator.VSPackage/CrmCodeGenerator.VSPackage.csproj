@@ -232,6 +232,11 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Templates\CrmSvcUtilExtendedV2-multipleout.tt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <LastGenOutput>CrmSvcUtilExtendedV2-multipleout.cs</LastGenOutput>
+    </Content>
     <Content Include="Resources\Templates\CrmSvcUtilExtendedV2.tt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -255,6 +260,10 @@
     <Content Include="Resources\Templates\CrmSvcUtilExtended.tt">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Templates\MultipleOutputHelper.ttinclude">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
