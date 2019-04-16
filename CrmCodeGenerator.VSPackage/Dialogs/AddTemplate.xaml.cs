@@ -25,22 +25,9 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
     /// </summary>
     public partial class AddTemplate : Microsoft.VisualStudio.PlatformUI.DialogWindow
     {
-        private AddTemplateProp _Props;
-        public AddTemplateProp Props
-        {
-            get
-            {
-                return _Props;
-            }
-        }
+        public AddTemplateProp Props { get; }
 
-        private bool _Canceled = true;
-        public bool Canceled {
-            get
-            {
-                return _Canceled;
-            }
-        }
+        public bool Canceled { get; private set; } = true;
 
         public AddTemplate(EnvDTE80.DTE2 dte, Project project)
         {
@@ -49,15 +36,17 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
             InitializeComponent();
 
             var main = dte.GetMainWindow();
-            this.Owner = main;
+            Owner = main;
             //Loaded += delegate { this.CenterWindow(main); };
 
-            _Props = new AddTemplateProp();
-            this.DataContext = Props;
+            Props = new AddTemplateProp();
+            DataContext = Props;
 
             var samplesPath = System.IO.Path.Combine(DteHelper.AssemblyDirectory(), @"Resources\Templates");
             var dir = new DirectoryInfo(samplesPath);
-            Props.TemplateList = new ObservableCollection<String>(dir.GetFiles().Select(x => x.Name).Where(x => !x.Equals("Blank.tt")).ToArray());
+            Props.TemplateList = new ObservableCollection<string>(dir.GetFiles()
+                .Select(x => x.Name)
+                .Where(x => !x.Equals("Blank.tt") && x.EndsWith(".tt")));
             Props.Template = "CrmSchema.tt";
             Props.Folder = project.GetProjectDirectory();
             
@@ -69,21 +58,21 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.DefaultTemplate.SelectedIndex = 0;
+            DefaultTemplate.SelectedIndex = 0;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             //this.DialogResult = false;
-            _Canceled = true;
-            this.Close();
+            Canceled = true;
+            Close();
         }
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
             //this.DialogResult = true;
-            _Canceled = false;
-            this.Close();
+            Canceled = false;
+            Close();
         }
     }
 
@@ -121,7 +110,7 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
             set
             {
                 SetField(ref _Template, value);
-                NewTemplate = !System.IO.File.Exists(System.IO.Path.Combine(_Folder, _Template));
+                NewTemplate = !File.Exists(System.IO.Path.Combine(_Folder, _Template));
             }
         }
         private string _Folder = "";

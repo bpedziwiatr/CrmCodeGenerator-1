@@ -377,7 +377,7 @@ namespace CrmCodeGenerator.VSPackage
                     return;
 
                 var templatePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(project.GetProjectDirectory(), m.Props.Template));  //GetFullpath removes un-needed relative paths  (ie if you are putting something in the solution directory)
-
+                string includeT4Path = System.IO.Path.GetFullPath(System.IO.Path.Combine(project.GetProjectDirectory(), m.Props.Folder)) + "\\MultipleOutputHelper.ttinclude";
                 if (System.IO.File.Exists(templatePath))
                 {
                     var results = VsShellUtilities.ShowMessageBox(ServiceProvider.GlobalProvider, "'" + templatePath + "' already exists, are you sure you want to overwrite?", "Overwrite", OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNOCANCEL, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -410,7 +410,11 @@ namespace CrmCodeGenerator.VSPackage
                 // a blank file, then overwrite it
                 // http://stackoverflow.com/questions/17993874/add-template-file-without-custom-tool-to-project-programmatically
                 var blankTemplatePath = System.IO.Path.Combine(DteHelper.AssemblyDirectory(), @"Resources\Templates\Blank.tt");
+                if(m.DefaultTemplate.SelectedValue.ToString().Contains("multipleout"))
+                    System.IO.File.Copy(System.IO.Path.Combine(DteHelper.AssemblyDirectory(), @"Resources\Templates\MultipleOutputHelper.ttinclude"), includeT4Path, true);
+
                 System.IO.File.Copy(blankTemplatePath, templatePath, true);
+                
 
                 var p = project.ProjectItems.AddFromFile(templatePath);
                 p.Properties.SetValue("CustomTool", "");
