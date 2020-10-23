@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Xrm.Tooling.Connector;
 
 namespace CrmCodeGenerator.VSPackage.Dialogs
 {
@@ -133,8 +134,7 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
         {
             try
             {
-                var connString = Microsoft.Xrm.Client.CrmConnection.Parse(settings.GetOrganizationCrmConnectionString());
-                var connection = new Microsoft.Xrm.Client.Services.OrganizationService(connString);
+                CrmServiceClient connection = new CrmServiceClient(settings.GetOrganizationCrmConnectionString());
 
                 RetrieveAllEntitiesRequest request = new RetrieveAllEntitiesRequest()
                 {

@@ -16,7 +16,7 @@ namespace <#= Context.Namespace #>
 {
 <# manager.EndBlock(); #>
 <# foreach (var entity in Context.Entities) { 
-        manager.StartNewFile(String.Format("{0}.cs", entity.HybridName)); 
+		manager.StartNewFile(String.Format("{0}.cs", entity.HybridName)); 
 #>
 <#	if (entity.States != null) { #>
 	[DataContract]
@@ -37,7 +37,7 @@ namespace <#= Context.Namespace #>
 	[EntityLogicalName("<#=entity.LogicalName#>")]
 	public partial class <#=entity.HybridName#> : Entity, INotifyPropertyChanging, INotifyPropertyChanged
 	{
-       
+	   
 		
 		/// <summary>
 		/// Default Constructor.
@@ -293,17 +293,17 @@ namespace <#= Context.Namespace #>
 	{
 		public class Fields
 		{
-		    public const string SchemaName = "<#=entity.Attribute.LogicalName#>";
+			public const string SchemaName = "<#=entity.Attribute.LogicalName#>";
 
-            #region Fields.<#=entity.Attribute.LogicalName#>
+			#region Fields.<#=entity.Attribute.LogicalName#>
 
 <#foreach(var f in entity.Fields){#>
-            public const string <#=f.DisplayName#> = "<#=f.Attribute.LogicalName#>";
+			public const string <#=f.DisplayName#> = "<#=f.Attribute.LogicalName#>";
 <#}#>		
-            #endregion Fields."<#=entity.Attribute.LogicalName#>
+			#endregion Fields."<#=entity.Attribute.LogicalName#>
 <# //BEGIN// 1:N Realationships  #>
 
-            #region 1:N Realationships
+			#region 1:N Realationships
 		<#	foreach(var attribute in entity.RelationshipsOneToMany)	{#>			
 <# if(attribute.SchemaName == "calendar_calendar_rules" || attribute.SchemaName == "service_calendar_rules") { #>		
 			public const string  Relationship_1N_calendarrules ="calendarrules";
@@ -311,43 +311,43 @@ namespace <#= Context.Namespace #>
 			public const string Relationship_1N_<#=attribute.SchemaName#> ="<#=attribute.SchemaName#>";		
 <# } #>
 <#}#>
-            #endregion  1:N Realationships
+			#endregion  1:N Realationships
 
 <# //END// 1:N Realationships#>
 <#//BEGIN// N:1 Realationships #>
-            #region N:1 Realationships
+			#region N:1 Realationships
 	
 	<#foreach(var attribute in entity.RelationshipsManyToOne)	{ #>
 		public const string Relationship_N1_<#=attribute.SchemaName#> ="<#=attribute.SchemaName#>";
 	<# } #>		
-            #endregion N:1 Realationships
+			#endregion N:1 Realationships
 <# //END// N:1 Realationships #>
 
 <#//BEGIN// N:N Realationships#>
-            #region N:N Realationships
+			#region N:N Realationships
 	<#foreach(var attribute in entity.RelationshipsManyToMany)	{#>
 		public const string Relationship_NN_<#=attribute.SchemaName#> ="<#=attribute.SchemaName#>";
 		<#}#>
 
-            #endregion N:N Realationships
+			#endregion N:N Realationships
 <# //END// N:N Realationships  #>
 
-        }
-    }
+		}
+	}
 <# manager.StartNewFile(String.Format("{0}.Enums.cs", entity.HybridName)); #>
 	public partial class <#=entity.HybridName#> : Entity, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		 public class Enums
-        {
+		{
 <#foreach(var enm in entity.Enums){#>
-            public enum <#=enm.DisplayName#> 
-            {
+			public enum <#=enm.DisplayName#> 
+			{
 <#foreach(var item in enm.Items){#>
-                <#= item.Name #> = <#= item.Value #>,
+				<#= item.Name #> = <#= item.Value #>,
 <#}#>
-            }		
+			}		
 <#}#>
-        }
+		}
 	}
 <#
 manager.EndBlock();
@@ -383,6 +383,6 @@ manager.EndBlock();
 		}
 	}
 <#}#>
-    }
+	}
 
 <# manager.Process(true); #>

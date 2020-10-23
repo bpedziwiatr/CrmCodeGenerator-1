@@ -43,6 +43,7 @@ namespace CrmCodeGenerator.VSPackage.Model
         private bool _UseIFD;
         private bool _UseOnline;
         private bool _UseOffice365;
+        private bool _UseConnectionString;
         private string _OutputPath;
         private string _Namespace;
         private string _EntitiesToIncludeString;
@@ -219,6 +220,18 @@ namespace CrmCodeGenerator.VSPackage.Model
             set
             {
                 SetField(ref _ServerName, value);
+            }
+        }
+        private string _ConnectionSttring = "";
+        public string ConnectionSttring
+        {
+            get
+            {
+                return _ConnectionSttring;
+            }
+            set
+            {
+                SetField(ref _ConnectionSttring, value);
             }
         }
         private string _ServerPort = "";
@@ -440,6 +453,26 @@ namespace CrmCodeGenerator.VSPackage.Model
                 }
             }
         }
+        public bool UseConnectionString
+        {
+            get { return _UseConnectionString; }
+            set
+            {
+                if (SetField(ref _UseConnectionString, value))
+                {
+                    if (value)
+                    {
+                        UseIFD = false;
+                        UseOnline = false;
+                        UseSSL = false;
+                        UseWindowsAuth = false;
+                        
+                    }
+                    ReEvalReadOnly();
+                }
+            }
+        }
+    
         private bool _UseWindowsAuth;
         public bool UseWindowsAuth
         {
@@ -539,6 +572,10 @@ namespace CrmCodeGenerator.VSPackage.Model
 
         public string GetDiscoveryCrmConnectionString()
         {
+            if (UseConnectionString)
+            {
+                return ConnectionSttring;
+            }
             var connectionString = string.Format("Url={0}://{1}:{2};",
                 UseSSL ? "https" : "http",
                 UseIFD ? ServerName : UseOffice365 ? "disco." + ServerName : UseOnline ? "dev." + ServerName : ServerName,
@@ -597,6 +634,11 @@ namespace CrmCodeGenerator.VSPackage.Model
 
         public string GetOrganizationCrmConnectionString()
         {
+            if (UseConnectionString)
+            {
+                return ConnectionSttring;
+            }
+
             var currentServerName = string.Empty;
 
             var orgDetails  = ConnectionHelper.GetOrganizationDetails(this);
