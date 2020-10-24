@@ -288,6 +288,7 @@ namespace <#= Context.Namespace #>
 			}
 		}
 <#} //END// N:N Realationships  #>
+}
 <# manager.StartNewFile(String.Format("{0}.Fields.cs", entity.HybridName)); #>
 	public partial class <#=entity.HybridName#> : Entity, INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -384,5 +385,6 @@ manager.EndBlock();
 	}
 <#}#>
 	}
+
 
 <# manager.Process(true); #>

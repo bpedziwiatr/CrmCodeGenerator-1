@@ -166,8 +166,7 @@ namespace CrmCodeGenerator.VSPackage.Dialogs
             try
             {
 
-                var connection = Microsoft.Xrm.Client.CrmConnection.Parse(settings.GetOrganizationCrmConnectionString());
-                settings.CrmConnection = new Microsoft.Xrm.Client.Services.OrganizationService(connection);
+                settings.CrmConnection = new CrmServiceClient(settings.GetOrganizationCrmConnectionString());
                 // TODO remove the QuickConnection class -->  settings.CrmConnection = QuickConnection.Connect(settings.CrmSdkUrl, settings.Domain, settings.Username, settings.Password, settings.CrmOrg);
                 if (settings.CrmConnection == null)
                      throw new UserException("Unable to login to CRM, check to ensure you have the right organization");

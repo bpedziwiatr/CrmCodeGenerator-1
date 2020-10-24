@@ -17,7 +17,6 @@ namespace CrmCodeGenerator.VSPackage
             //var connection = new Microsoft.Xrm.Client.CrmConnection(connectionString);
             //var test = new Microsoft.Xrm.Client.Services.OrganizationService(connection);
             //return test;
-            
             var credentials = GetCredentials(url, domain, username, password);
             ClientCredentials deviceCredentials = null;
             if (url.IndexOf("dynamics.com", StringComparison.InvariantCultureIgnoreCase) > -1)

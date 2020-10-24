@@ -10,6 +10,7 @@ using CrmCodeGenerator.VSPackage.Model;
 using CrmCodeGenerator.VSPackage.T4;
 using Microsoft.Xrm.Sdk.Messages;
 using CrmCodeGenerator.VSPackage.Helpers;
+using Microsoft.Xrm.Tooling.Connector;
 
 namespace CrmCodeGenerator.VSPackage
 {
@@ -56,6 +57,10 @@ namespace CrmCodeGenerator.VSPackage
 
             if (this.Settings.CrmConnection == null)
             {
+                if (Settings.UseConnectionString)
+                {
+                    return  new CrmServiceClient(Settings.ConnectionSttring);
+                }
                 sdk = QuickConnection.Connect(this.Settings.CrmSdkUrl,
                     this.Settings.Domain,
                     this.Settings.Username,
