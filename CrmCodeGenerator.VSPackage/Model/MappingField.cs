@@ -297,7 +297,7 @@ namespace CrmCodeGenerator.VSPackage.Model
                 case AttributeTypeCode.String:
                     if (field.AttributeTypeName == "MultiSelectPicklistType")
                     {
-                        return ".OptionSetValueCollection";
+                        return "OptionSetValueCollection";
                     }
                     return "string";
 
